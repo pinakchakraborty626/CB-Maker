@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>প্রো সিভি অ্যাপ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;600&display=swap');
+        body { font-family: 'Hind Siliguri', sans-serif; background-color: #f1f5f9; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .active-tab { border-bottom: 4px solid #1d4ed8; color: #1d4ed8; font-weight: bold; }
+        .cv-page { width: 210mm; min-height: 297mm; background: white; margin: 0 auto; padding: 15mm; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .section-header { background-color: #dbeafe; color: #1e40af; padding: 4px 10px; font-weight: 600; display: block; margin-top: 15px; margin-bottom: 8px; font-size: 14px; text-transform: uppercase; border-left: 4px solid #1e40af; }
+        @media (max-width: 1024px) { .cv-page { width: 100%; min-height: auto; padding: 8mm; } }
+        .input-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e2e8f0; }
+        label { display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 4px; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline-color: #3b82f6; }
+    </style>
+</head>
+<body class="pb-24">
+
+    <div class="fixed top-0 left-0 right-0 bg-white shadow-md flex z-50">
+        <button onclick="switchTab('edit')" id="tab-edit" class="flex-1 p-4 text-center active-tab">এডিট করুন</button>
+        <button onclick="switchTab('preview')" id="tab-preview" class="flex-1 p-4 text-center">প্রিভিউ দেখুন</button>
+    </div>
+
+    <main class="mt-16 p-4 max-w-4xl mx-auto">
+        <!-- ==================== এডিট সেকশন ==================== -->
+        <div id="content-edit" class="tab-content active">
+            
+            <div class="input-card">
+                <h3 class="text-blue-600 font-bold mb-3 border-b pb-1 text-lg">প্রাথমিক তথ্য</h3>
+                <div class="space-y-4">
+                    <div><label>ছবি</label><input type="file" id="in-photo" accept="image/*" onchange="previewImage(event)"></div>
+                    <div><label>আপনার পূর্ণ নাম</label><input type="text" id="in-name" oninput="updateCV()"></div>
+                    <div><label>ফোন নম্বর</label><input type="text" id="in-phone" oninput="updateCV()"></div>
+                    <div><label>বর্তমান ঠিকানা (Present Address)</label><textarea id="in-address" oninput="updateCV()" rows="2" placeholder="আপনার বর্তমান ঠিকানা এখানে লিখুন"></textarea></div>
+                    <div><label>ক্যারিয়ার অবজেক্টিভ</label><textarea id="in-objective" oninput="updateCV()" rows="3"></textarea></div>
+                </div>
+            </div>
+
+            <div class="input-card">
+                <h3 class="text-blue-600 font-bold mb-3 border-b pb-1 text-lg">শিক্ষা ও যোগ্যতা</h3>
+                <div class="bg-gray-50 p-4 rounded-lg border mb-4">
+                    <div class="space-y-3">
+                        <select id="edu-type" class="bg-white">
+                            <option value="S.S.C">S.S.C</option>
+                            <option value="H.S.C">H.S.C</option>
+                            <option value="Diploma">Diploma</option>
+                            <option value="Honours">Honours/Degree</option>
+                            <option value="Masters">Masters</option>
+                        </select>
+                        <input type="text" id="edu-inst" placeholder="প্রতিষ্ঠানের নাম">
+                        <input type="text" id="edu-board" placeholder="বোর্ড/বিশ্ববিদ্যালয়">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="edu-year" placeholder="পাসের বছর">
+                            <input type="text" id="edu-res" placeholder="জিপিএ/রেজাল্ট">
+                        </div>
+                        <button onclick="addEducation()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold">শিক্ষা যোগ করুন</button>
+                    </div>
+                </div>
+                <div id="edu-list-edit" class="space-y-2"></div>
+            </div>
+
+            <div class="input-card">
+                <h3 class="text-blue-600 font-bold mb-3 border-b pb-1 text-lg">অন্যান্য তথ্য</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label>পিতার নাম</label><input type="text" id="in-father" oninput="updateCV()"></div>
+                    <div><label>মাতার নাম</label><input type="text" id="in-mother" oninput="updateCV()"></div>
+                    <div><label>জন্ম তারিখ</label><input type="text" id="in-dob" oninput="updateCV()"></div>
+                    <div><label>জন্মস্থান</label><input type="text" id="in-birthplace" oninput="updateCV()"></div>
+                    <div><label>রক্তের গ্রুপ</label><input type="text" id="in-blood" oninput="updateCV()"></div>
+                    <div><label>লিঙ্গ</label><input type="text" id="in-sex" oninput="updateCV()"></div>
+
+                    <div><label>দেশ (Country)</label>
+                        <select id="in-country" oninput="updateCV()">
+                            <option value="">নির্বাচন করুন</option>
+                            <option value="Bangladesh">Bangladesh</option>
+                            <option value="India">India</option>
+                            <option value="Pakistan">Pakistan</option>
+                            <option value="Nepal">Nepal</option>
+                            <option value="Sri Lanka">Sri Lanka</option>
+                            <option value="United States">United States</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="Canada">Canada</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Germany">Germany</option>
+                            <option value="Saudi Arabia">Saudi Arabia</option>
+                            <option value="United Arab Emirates">United Arab Emirates</option>
+                            <option value="Malaysia">Malaysia</option>
+                            <option value="Singapore">Singapore</option>
+                            <option value="Qatar">Qatar</option>
+                        </select>
+                    </div>
+                    <div><label>ধর্ম (Religion)</label>
+                        <select id="in-religion" oninput="updateCV()">
+                            <option value="">নির্বাচন করুন</option>
+                            <option value="Islam">Islam</option>
+                            <option value="Hindu">Hindu</option>
+                            <option value="Buddhist">Buddhist</option>
+                            <option value="Christian">Christian</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div><label>বৈবাহিক অবস্থা (Marital Status)</label>
+                        <select id="in-marital" oninput="updateCV()">
+                            <option value="">নির্বাচন করুন</option>
+                            <option value="Married">Married</option>
+                            <option value="Unmarried">Unmarried</option>
+                        </select>
+                    </div>
+                    <div><label>পোস্ট কোড (Postal Code)</label><input type="text" id="in-postcode" oninput="updateCV()" placeholder="যেমন: ১২০৫"></div>
+                    <div><label>উচ্চতা (Height)</label><input type="text" id="in-height" oninput="updateCV()" placeholder="যেমন: ৫'৬&quot; বা ১৬৮ সেমি"></div>
+                </div>
+
+                <div class="mt-4 space-y-4">
+                    <div><label>বিশেষ দক্ষতা (কমা দিয়ে লিখুন)</label><input type="text" id="in-skills" oninput="updateCV()"></div>
+                    <div><label>ভাষা দক্ষতা (কমা দিয়ে লিখুন)</label><input type="text" id="in-lang" oninput="updateCV()"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== প্রিভিউ সেকশন ==================== -->
+        <div id="content-preview" class="tab-content preview-wrap">
+            <div id="cv-content" class="cv-page text-sm">
+                
+                <!-- সবার উপরে পরিচয় পত্র -->
+                <div class="text-center mb-8">
+                    <h1 class="text-4xl font-bold text-blue-900 tracking-wide">পরিচয় পত্র</h1>
+                    <p class="text-2xl font-semibold text-gray-700 mt-2">CURRICULUM VITAE</p>
+                </div>
+
+                <div class="flex items-center justify-between border-b-4 border-blue-800 pb-4 mb-6">
+                    <div class="flex-1">
+                        <h1 id="out-name" class="text-3xl font-bold text-gray-800"></h1>
+                        <p id="out-phone" class="text-lg text-blue-700 font-semibold"></p>
+                    </div>
+                    <img id="out-photo" class="w-28 h-28 object-cover border-4 border-blue-50 hidden rounded-lg" src="">
+                </div>
+
+                <div id="sec-obj" class="hidden mb-4">
+                    <p id="out-objective" class="text-gray-700 leading-relaxed text-justify"></p>
+                </div>
+
+                <div id="sec-address" class="hidden">
+                    <span class="section-header">Present Address</span>
+                    <p id="out-address" class="text-gray-700 px-2"></p>
+                </div>
+
+                <div id="sec-edu" class="hidden">
+                    <span class="section-header">Academic Qualification</span>
+                    <div id="out-edu-list" class="space-y-4 px-2"></div>
+                </div>
+
+                <div id="sec-pers" class="hidden">
+                    <span class="section-header">Personal Information</span>
+                    <div class="px-2">
+                        <table class="w-full text-xs">
+                            <tr id="r-father" class="hidden"><td class="w-36 py-1 font-bold">Father's Name</td><td>: <span id="out-father"></span></td></tr>
+                            <tr id="r-mother" class="hidden"><td class="py-1 font-bold">Mother's Name</td><td>: <span id="out-mother"></span></td></tr>
+                            <tr id="r-dob" class="hidden"><td class="py-1 font-bold">Date of Birth</td><td>: <span id="out-dob"></span></td></tr>
+                            <tr id="r-birth" class="hidden"><td class="py-1 font-bold">Birthplace</td><td>: <span id="out-birthplace"></span></td></tr>
+                            <tr id="r-blood" class="hidden"><td class="py-1 font-bold">Blood Group</td><td>: <span id="out-blood"></span></td></tr>
+                            <tr id="r-sex" class="hidden"><td class="py-1 font-bold">Sex</td><td>: <span id="out-sex"></span></td></tr>
+                            
+                            <tr id="r-country" class="hidden"><td class="py-1 font-bold">Country</td><td>: <span id="out-country"></span></td></tr>
+                            <tr id="r-religion" class="hidden"><td class="py-1 font-bold">Religion</td><td>: <span id="out-religion"></span></td></tr>
+                            <tr id="r-marital" class="hidden"><td class="py-1 font-bold">Marital Status</td><td>: <span id="out-marital"></span></td></tr>
+                            <tr id="r-postcode" class="hidden"><td class="py-1 font-bold">Postal Code</td><td>: <span id="out-postcode"></span></td></tr>
+                            <tr id="r-height" class="hidden"><td class="py-1 font-bold">Height</td><td>: <span id="out-height"></span></td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="sec-skill" class="hidden">
+                    <span class="section-header">Special Skill</span>
+                    <ul id="out-skill-list" class="list-disc list-inside text-xs px-2 space-y-1"></ul>
+                </div>
+
+                <div id="sec-lang" class="hidden">
+                    <span class="section-header">Language Proficiency</span>
+                    <ul id="out-lang-list" class="list-disc list-inside text-xs px-2 space-y-1"></ul>
+                </div>
+            </div>
+            
+            <div class="p-6">
+                <!-- পরিবর্তিত বাটন -->
+                <button onclick="downloadPDF()" class="w-full bg-green-600 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-700 text-lg">
+                    Download PDF
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let educationData = [];
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('content-' + tab).classList.add('active');
+            document.getElementById('tab-edit').classList.toggle('active-tab', tab === 'edit');
+            document.getElementById('tab-preview').classList.toggle('active-tab', tab === 'preview');
+            window.scrollTo(0,0);
+        }
+
+        function previewImage(e) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const img = document.getElementById('out-photo');
+                img.src = reader.result;
+                img.classList.remove('hidden');
+            };
+            if (e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
+        }
+
+        function addEducation() {
+            const type = document.getElementById('edu-type').value;
+            const inst = document.getElementById('edu-inst').value;
+            const board = document.getElementById('edu-board').value;
+            const year = document.getElementById('edu-year').value;
+            const res = document.getElementById('edu-res').value;
+            if (!inst) return alert("প্রতিষ্ঠানের নাম লিখুন");
+            educationData.push({type, inst, board, year, res});
+            renderEduList();
+            updateCV();
+            document.getElementById('edu-inst').value = '';
+            document.getElementById('edu-board').value = '';
+            document.getElementById('edu-year').value = '';
+            document.getElementById('edu-res').value = '';
+        }
+
+        function renderEduList() {
+            document.getElementById('edu-list-edit').innerHTML = educationData.map((e, i) => `
+                <div class="flex justify-between bg-blue-50 p-2 rounded border">
+                    <span><b>${e.type}</b> - ${e.inst}</span>
+                    <button onclick="educationData.splice(${i},1);renderEduList();updateCV();" class="text-red-500 font-bold">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function updateCV() {
+            setVal('in-name', 'out-name');
+            setVal('in-phone', 'out-phone');
+            setValWithSec('in-objective', 'out-objective', 'sec-obj');
+            setValWithSec('in-address', 'out-address', 'sec-address');
+
+            const outEdu = document.getElementById('out-edu-list');
+            outEdu.innerHTML = educationData.map(e => `
+                <div>
+                    <h4 class="font-bold underline text-blue-900">${e.type}</h4>
+                    <p class="text-xs"><b>Institute:</b> ${e.inst} | <b>Board:</b> ${e.board}</p>
+                    <p class="text-xs"><b>Result:</b> ${e.res} | <b>Passing Year:</b> ${e.year}</p>
+                </div>
+            `).join('');
+            toggle('sec-edu', educationData.length > 0);
+
+            let p = false;
+            p |= setValWithSec('in-father', 'out-father', 'r-father');
+            p |= setValWithSec('in-mother', 'out-mother', 'r-mother');
+            p |= setValWithSec('in-dob', 'out-dob', 'r-dob');
+            p |= setValWithSec('in-birthplace', 'out-birthplace', 'r-birth');
+            p |= setValWithSec('in-blood', 'out-blood', 'r-blood');
+            p |= setValWithSec('in-sex', 'out-sex', 'r-sex');
+            p |= setValWithSec('in-country', 'out-country', 'r-country');
+            p |= setValWithSec('in-religion', 'out-religion', 'r-religion');
+            p |= setValWithSec('in-marital', 'out-marital', 'r-marital');
+            p |= setValWithSec('in-postcode', 'out-postcode', 'r-postcode');
+            p |= setValWithSec('in-height', 'out-height', 'r-height');
+            toggle('sec-pers', p);
+
+            handleList('in-skills', 'out-skill-list', 'sec-skill');
+            handleList('in-lang', 'out-lang-list', 'sec-lang');
+        }
+
+        function setVal(inId, outId) {
+            const v = document.getElementById(inId).value;
+            document.getElementById(outId).innerText = v;
+            return v.trim().length > 0;
+        }
+
+        function setValWithSec(inId, outId, secId) {
+            const v = document.getElementById(inId).value;
+            document.getElementById(outId).innerText = v;
+            toggle(secId, v.trim().length > 0);
+            return v.trim().length > 0;
+        }
+
+        function handleList(inId, listId, secId) {
+            const v = document.getElementById(inId).value;
+            const list = document.getElementById(listId);
+            list.innerHTML = '';
+            if (v.trim()) {
+                toggle(secId, true);
+                v.split(',').forEach(s => {
+                    let li = document.createElement('li');
+                    li.innerText = s.trim();
+                    list.appendChild(li);
+                });
+            } else {
+                toggle(secId, false);
+            }
+        }
+
+        function toggle(id, show) {
+            document.getElementById(id).classList.toggle('hidden', !show);
+        }
+
+        // ==================== ডাউনলোড ফাংশন ====================
+        function downloadPDF() {
+            const element = document.getElementById('cv-content');
+            
+            html2pdf().set({
+                margin: 0,
+                filename: 'My_CV.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { scale: 3, useCORS: true, allowTaint: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            })
+            .from(element)
+            .outputPdf('blob')
+            .then(function(blob) {
+                const url = URL.createObjectURL(blob);
+                window.open(url, '_blank');
+                
+                setTimeout(() => {
+                    URL.revokeObjectURL(url);
+                }, 1500);
+            })
+            .catch(function(err) {
+                console.error(err);
+                alert("PDF তৈরিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
+            });
+        }
+
+        window.onload = updateCV;
+    </script>
+</body>
+</html>
